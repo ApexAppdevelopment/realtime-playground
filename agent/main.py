@@ -19,9 +19,12 @@ from livekit.agents import (
 from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 logger = logging.getLogger("my-worker")
 logger.setLevel(logging.INFO)
-
 
 @dataclass
 class SessionConfig:
@@ -95,7 +98,11 @@ async def entrypoint(ctx: JobContext):
 def run_multimodal_agent(ctx: JobContext, participant: rtc.Participant):
     metadata = json.loads(participant.metadata)
     config = parse_session_config(metadata)
-    logger.info(f"starting omni assistant with config: {config.to_dict()}")
+
+    logger.info(f"starting MultimodalAgent with config: {config.to_dict()}")
+
+    if not config.openai_api_key:
+        raise Exception("OpenAI API Key is required")
 
     model = openai.realtime.RealtimeModel(
         api_key=config.openai_api_key,
